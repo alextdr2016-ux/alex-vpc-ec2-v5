@@ -1,0 +1,28 @@
+# Copiază acest fișier în terraform.tfvars.dev și completează valorile
+
+environment          = "dev"
+vpc_cidr            = "10.0.0.0/16"
+public_subnet_cidr  = "10.0.1.0/24"
+private_subnet_cidr = "10.0.2.0/24"
+ami_id              = "ami-0c7d68785ec07306c"
+instance_type       = "t3.nano"
+availability_zone   = "eu-north-1a"
+```
+
+---
+
+## 📊 Structura finală:
+```
+alex-vpc-ec2-v5/
+├── .github/
+│   └── workflows/
+│       ├── terraform-ci.yml     ← CI Pipeline
+│       └── terraform-cd.yml     ← CD Pipeline
+├── .gitignore                   ← NU commit secrets!
+├── README.md                    ← Documentație
+├── terraform.tfvars.dev.example ← Template
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── upgrade.tf
+└── modules/
