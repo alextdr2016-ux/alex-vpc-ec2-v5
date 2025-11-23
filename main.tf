@@ -107,3 +107,66 @@ resource "aws_instance" "alex_ec2_v5" {
     Name = var.instance_name
   }
 }
+
+# ELASTIC IP pentru NAT Gateway
+resource "aws_eip" "nat_eip_v5" {
+  domain = "vpc"
+
+  tags = {
+    Name = "alex-nat-eip-v5"
+  }
+
+  depends_on = [aws_internet_gateway.alex_gw_v5]
+}
+
+resource "aws_nat_gateway" "nat_gw_v5" {
+  allocation_id = aws_eip.nat_eip_v5.id
+  subnet_id     = aws_subnet.alex_public_subnet_v5.id
+  tags = {
+    Name = "alex-nat-gw-v5"
+  }
+
+  depends_on = [aws_internet_gateway.alex_gw_v5]
+}
+
+resource "aws_subnet" "alex_private_subnet_v5" {
+  vpc_id                  = aws_vpc.alex_vpc_v5.id
+  cidr_block              = var.private_subnet_cidr
+  availability_zone       = var.availability_zone
+
+  tags = {
+    Name = var.private_subnet_name
+  }
+}
+
+# PRIVATE ROUTE TABLE (cu rută către NAT)
+resource "aws_route_table" "alex_private_rt_v5" {
+  vpc_id = aws_vpc.alex_vpc_v5.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gw_v5.id
+  }
+
+  tags = {
+    Name = "alex-private-rt-v5"
+  }
+}
+
+
+resource "aws_route_table_association" "alex_private_ra_v5" {
+  subnet_id = aws_subnet.alex_private_subnet_v5.id
+  route_table_id = aws_route_table.alex_private_rt_v5.id
+}
+
+resource "aws_instance" "alex_private_ec2_v5" {
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.alex_private_subnet_v5.id
+  vpc_security_group_ids = [aws_security_group.alex_sg_v5.id]
+
+  tags = {
+    Name = var.private_instance_name
+  }
+}
+
